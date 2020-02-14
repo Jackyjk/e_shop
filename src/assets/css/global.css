@@ -1,14 +1,26 @@
 /*global style*/
-html,body,#app{
+html,
+body,
+#app {
     height: 100%;
     margin: 0;
     padding: 0;
 }
 
-.el-breadcrumb{
+.el-breadcrumb {
     margin-bottom: 15px;
     font-size: 12px;
 }
-.el-card{
-    box-sizing: 0 1px 1px rgb(0,0,0,0.15) !important;
+
+.el-card {
+    box-sizing: 0 1px 1px rgb(0, 0, 0, 0.15) !important;
+}
+
+.el-table {
+    margin-top: 15px;
+    font-size: 12px;
+}
+
+.el-pagination {
+    margin-top: 15px;
 }
