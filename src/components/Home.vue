@@ -29,8 +29,10 @@
           text-color="#fff"
           active-text-color="#409eff"
           unique-opened
-          :collapse = "isCollpase"
-          :collapse-transition= "false"
+          :collapse="isCollpase"
+          :collapse-transition="false"
+          :router="true"
+          :default-active='activePath'
         >
           <!-- 一级菜单 -->
           <el-submenu
@@ -47,9 +49,10 @@
             </template>
             <!-- 二级菜单 -->
             <el-menu-item
-              :index="subItem.id + ''"
+              :index="'/' + subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
+              @click="saveNavState('/' + subItem.path)"
             >
               <template slot="title">
                 <!-- 图标 -->
@@ -63,7 +66,9 @@
       </el-aside>
       <!-- 右侧主体区域 -->
       <el-container>
-        <el-main>Main</el-main>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
         <!-- 底部区域 -->
         <el-footer>Footer</el-footer>
       </el-container>
@@ -84,11 +89,14 @@ export default {
         145: 'iconfont icon-baobiao'
       },
       // 是否折叠
-      isCollpase: false
+      isCollpase: false,
+      // 被激活链接地址
+      activePath: ''
     }
   },
   created() {
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
     logout() {
@@ -105,6 +113,10 @@ export default {
     // 点击按钮  切换折叠展开
     toggleCollapse() {
       this.isCollpase = !this.isCollpase
+    },
+    // 保存链接激活状态
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
     }
   }
 }
@@ -128,7 +140,7 @@ export default {
   }
 }
 .el-main {
-  background-color: rgb(161, 204, 206);
+  background-color: #dee7f0;
 }
 .el-aside {
   background-color: #545c64;
