@@ -14,7 +14,11 @@
         </el-col>
       </el-row>
       <!-- 角色列表区域 -->
-      <el-table :data="rolelist" border stripe>
+      <el-table
+        :data="rolelist"
+        border
+        stripe
+      >
         <!-- 展开列 -->
         <el-table-column type="expand">
           <template slot-scope="scope">
@@ -25,7 +29,10 @@
             >
               <!-- 渲染一级权限 -->
               <el-col :span="5">
-                <el-tag closable @close="removeRightById(scope.row,item1.id)">{{item1.authName}}</el-tag>
+                <el-tag
+                  closable
+                  @close="removeRightById(scope.row,item1.id)"
+                >{{item1.authName}}</el-tag>
                 <i class="el-icon-caret-right"></i>
               </el-col>
               <!-- 渲染二级三级权限 -->
@@ -65,9 +72,18 @@
         </el-table-column>
         <!-- 索引列 -->
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="角色名称" prop="roleName"></el-table-column>
-        <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
-        <el-table-column label="操作" width="300px">
+        <el-table-column
+          label="角色名称"
+          prop="roleName"
+        ></el-table-column>
+        <el-table-column
+          label="角色描述"
+          prop="roleDesc"
+        ></el-table-column>
+        <el-table-column
+          label="操作"
+          width="300px"
+        >
           <template slot-scope="scope">
             <!-- 修改按钮 -->
             <el-button
@@ -83,13 +99,29 @@
               size="mini"
               @click="removeRolesById(scope.row.id)"
             >删除</el-button>
-            <el-button type="warning" icon="el-icon-setting" size="mini">分配权限</el-button>
+            <el-button
+              type="warning"
+              icon="el-icon-setting"
+              size="mini"
+              @click="showSetRightDialog(scope.row)"
+            >分配权限</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
-    <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
-      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
+    <!-- 修改用户信息对话框 -->
+    <el-dialog
+      title="修改用户"
+      :visible.sync="editDialogVisible"
+      width="50%"
+      @close="editDialogClosed"
+    >
+      <el-form
+        :model="editForm"
+        :rules="editFormRules"
+        ref="editFormRef"
+        label-width="70px"
+      >
         <el-form-item label="角色名称">
           <el-input v-model="editForm.roleName"></el-input>
         </el-form-item>
@@ -97,9 +129,43 @@
           <el-input v-model="editForm.roleDesc"></el-input>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
         <el-button @click="editDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editRolesInfo">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="editRolesInfo"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 分配权限对话框 -->
+    <el-dialog
+      title="分配权限"
+      :visible.sync="setRighgtDialogVisible"
+      width="50%"
+      @close="setRighgtDialogClosed"
+    >
+      <!-- 树形结构 获取权限信息 -->
+      <el-tree
+        :data="rightsList"
+        :props="treeProps"
+        show-checkbox
+        node-key="id"
+        :default-expand-all="true"
+        :default-checked-keys="defKeys"
+        ref="treeRef"
+      ></el-tree>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="setRighgtDialogVisible = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="allotRights"
+        >确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -126,7 +192,18 @@ export default {
       editFormRules: {
         email: [{ required: true, message: '请输入用户邮箱', trigger: 'blur' }],
         mobile: [{ required: true, message: '请输入用户手机', trigger: 'blur' }]
-      }
+      },
+      // 控制权限分配对话框的显示与隐藏
+      setRighgtDialogVisible: false,
+      // 所有权限的数据
+      rightsList: [],
+      // 树形控件的属性绑定对象
+      treeProps: {
+        children: 'children',
+        label: 'authName'
+      },
+      // 默认选中的节点id值 数组
+      defKeys: []
     }
   },
   created() {
@@ -233,6 +310,62 @@ export default {
       }
 
       role.children = res.data
+    },
+
+    // 展示分配权限的对话框
+    async showSetRightDialog(role) {
+      this.roleId = role.id
+      // 获取所有权限的数据
+      const { data: res } = await this.$http.get('rights/tree')
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取权限信息失败')
+      }
+      // 获取到的权限数据 保存到data中
+      this.rightsList = res.data
+      console.log(res.data)
+
+      // 递归获取三级节点的id
+      this.getLeafKeys(role, this.defKeys)
+      this.setRighgtDialogVisible = true
+    },
+
+    // 通过递归  获取角色下所有三级权限的id,并保存到defKeys中
+    getLeafKeys(node, arr) {
+      // 如果当前node节点不包含children属性  则指三级节点
+      if (!node.children) {
+        return arr.push(node.id)
+      }
+      node.children.forEach(item => this.getLeafKeys(item, arr))
+    },
+    // 监听分配权限对话框的关闭时间
+    setRighgtDialogClosed() {
+      this.defKeys = []
+    },
+
+    // 分配权限函数
+    async allotRights() {
+      const keys = [
+        ...this.$refs.treeRef.getCheckedKeys(),
+        ...this.$refs.treeRef.getHalfCheckedKeys()
+      ]
+
+      // console.log(keys)
+
+      const idStr = keys.join(',')
+      const { data: res } = await this.$http.post(
+        `roles/${this.roleId}/rights`,
+        {
+          rids: idStr
+        }
+      )
+      if (res.meta.status !== 200) {
+        return this.$message.error('分配权限失败！')
+      }
+      this.$message.success('更改权限成功！')
+
+      this.getRolesList()
+      // 隐藏对话框
+      this.setRighgtDialogVisible = false
     }
   }
 }
