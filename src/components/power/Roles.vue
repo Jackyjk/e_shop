@@ -122,8 +122,8 @@ export default {
         const { data: res } = await this.$http.put(
           `roles/${this.editForm.roleId}`,
           {
-            email: this.editForm.email,
-            mobile: this.editForm.mobile
+            roleName: this.editForm.roleName,
+            roleDesc: this.editForm.roleDesc
           }
         )
 
