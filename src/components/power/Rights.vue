@@ -15,13 +15,23 @@
         <el-table-column label="权限名称" prop="authName"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
         <el-table-column label="权限等级" prop="level">
-            <template slot-scope="scope">
-                <el-tag v-if="scope.row.level === '0'">一级</el-tag>
-                <el-tag type="success" v-else-if="scope.row.level === '1'">二级</el-tag>
-                <el-tag type="warning" v-else>三级</el-tag>
-            </template>
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.level === '0'">一级</el-tag>
+            <el-tag type="success" v-else-if="scope.row.level === '1'">二级</el-tag>
+            <el-tag type="warning" v-else>三级</el-tag>
+          </template>
         </el-table-column>
       </el-table>
+      <!-- 分页区域 -->
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="pagenum"
+        :page-sizes="[5,10,15]"
+        :page-size="pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+      ></el-pagination>
     </el-card>
   </div>
 </template>
@@ -31,7 +41,12 @@ export default {
   data() {
     return {
       // 权限列表
-      rightsList: []
+      rightsList: [],
+      total: 0,
+      // 当前页数
+      pagenum: 1,
+      // 每页显示多少条数据
+      pagesize: 5
     }
   },
   created() {
@@ -46,7 +61,21 @@ export default {
         return this.$message.error('获取用户权限列表失败！')
       }
       this.rightsList = res.data
+      this.total = res.data.length
       console.log(this.rightsList)
+      console.log(res)
+    },
+    // 监听pagesize改变
+    handleSizeChange(newSize) {
+      // console.log(newSize)
+      this.pagesize = newSize
+      this.getRightsList()
+    },
+    // 监听页码值改变
+    handleCurrentChange(newPage) {
+      // console.log(newPage)
+      this.pagenum = newPage
+      this.getRightsList()
     }
   }
 }

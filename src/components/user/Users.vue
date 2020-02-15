@@ -286,7 +286,7 @@ export default {
         const { data: res } = await this.$http.put(
           'users/' + this.editForm.id,
           {
-            email: this.editForm.email,
+            email: this.editForm.eFmail,
             mobile: this.editForm.mobile
           }
         )
