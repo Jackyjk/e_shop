@@ -1,6 +1,5 @@
 {
   "singleQuote": true,
-  "semi": false,
-  "editor.rulers": [150]
+  "semi": false
 }
 
