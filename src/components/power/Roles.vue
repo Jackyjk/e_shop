@@ -10,7 +10,7 @@
       <!-- 添加角色按钮区域 -->
       <el-row>
         <el-col>
-          <el-button type="primary">添加角色</el-button>
+          <el-button type="primary" @click="addRoleDialogVisible = true">添加角色</el-button>
         </el-col>
       </el-row>
       <!-- 角色列表区域 -->
@@ -61,6 +61,23 @@
         </el-table-column>
       </el-table>
     </el-card>
+    <!-- 添加角色 -->
+    <el-dialog title="添加角色信息" :visible.sync="addRoleDialogVisible" width="50%" @close="addRoleDialogClosed">
+      <!-- 内容主题区域 -->
+      <el-form :model="addFormRole" ref="addFormRoleRef" label-width="70px">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addFormRole.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="addFormRole.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addRole">确 定</el-button>
+      </span>
+    </el-dialog>
     <!-- 修改用户信息对话框 -->
     <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
       <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
@@ -120,7 +137,11 @@ export default {
         label: 'authName'
       },
       // 默认选中的节点id值 数组
-      defKeys: []
+      defKeys: [],
+      // 控制添加角色对话框显示与隐藏
+      addRoleDialogVisible: false,
+      // 添加角色表单数据
+      addFormRole: {}
     }
   },
   created() {
@@ -283,6 +304,24 @@ export default {
       this.getRolesList()
       // 隐藏对话框
       this.setRighgtDialogVisible = false
+    },
+    // 添加角色
+    addRole() {
+      this.$refs.addFormRoleRef.validate(async valid => {
+        // console.log(valid)
+        if (!valid) return
+        // 可以发起添加角色的网络请求
+        const { data: res } = await this.$http.post('roles', this.addFormRole)
+        if (res.meta.status !== 201) {
+          this.$message.error('添加角色信息失败')
+        } else {
+          this.$message.success('添加角色信息成功')
+        }
+        // 隐藏添加角色的对话框
+        this.addRoleDialogVisible = false
+        // 刷新用户列表
+        this.getRolesList()
+      })
     }
   }
 }
