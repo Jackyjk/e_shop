@@ -326,15 +326,9 @@ export default {
     // 监听添加用户对话框
     addRoleDialogClosed() {
       this.$refs.addFormRef.resetFields()
-<<<<<<< HEAD
-    } 
-  }
-} 
-=======
     }
   }
 }
->>>>>>> 82e2bd9e98eaec4e295a7bddbdd8282421e4c98d
 </script>
 
 <style lang="less" scoped>
