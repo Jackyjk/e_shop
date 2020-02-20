@@ -322,6 +322,10 @@ export default {
         // 刷新用户列表
         this.getRolesList()
       })
+    },
+    // 监听添加用户对话框
+    addRoleDialogClosed() {
+      this.$refs.addFormRef.resetFields()
     }
   }
 }
