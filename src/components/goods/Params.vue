@@ -30,7 +30,17 @@
           <!-- 动态参数表格 -->
           <el-table :data="manyTableData" border stripe>
             <!-- 展开行 -->
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- 循环渲染tag标签 -->
+                <el-tag v-for="(item,i) in scope.row.attr_vals" :key="i" closable>{{item}}</el-tag>
+                <!-- 输入文本框 -->
+                <el-input class="input-new-tag" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
+                </el-input>
+                <!-- 添加按钮 -->
+                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+              </template>
+            </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
@@ -163,7 +173,11 @@ export default {
             trigger: 'blur'
           }
         ]
-      }
+      },
+      // 控制按钮与文本框切换显示
+      inputVisible: false,
+      // 文本框中输入的内容
+      inputValue: ''
     }
   },
   created() {
@@ -206,7 +220,10 @@ export default {
       if (res.meta.status !== 200) {
         return this.$message.error('获取参数列表失败！！！')
       }
-      //   this.$message.success('')
+      res.data.forEach(item => {
+        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+      })
+
       console.log(res.data)
       //   判断数据到底属于哪个表格
       if (this.activeName === 'many') {
@@ -304,6 +321,14 @@ export default {
 
       this.$message.error('删除参数信息成功！！')
       this.getParamsData()
+    },
+    // 文本框失去焦点 或按下enter
+    handleInputConfirm() {
+      console.log('ok')
+    },
+    // 点击按钮 展示文本输入框
+    showInput() {
+      this.inputVisible = true
     }
   },
   computed: {
@@ -340,5 +365,12 @@ export default {
 .el-cascader {
   margin-top: 5px;
   width: 200px;
+}
+
+.el-tag {
+  margin: 10px;
+}
+.input-new-tag{
+  width: 120px;
 }
 </style>
