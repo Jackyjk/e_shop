@@ -60,7 +60,12 @@
               <el-button size="small" type="primary">点击上传</el-button>
             </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="商品内容" name="4">商品内容</el-tab-pane>
+          <el-tab-pane label="商品内容" name="4">
+            <!-- 富文本编辑器组件 -->
+            <quill-editor v-model="addForm.goods_introduce"></quill-editor>
+            <!-- 添加商品的按钮 -->
+            <el-button type="primary" class="btnAdd" @click="add">添加商品</el-button>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
@@ -73,6 +78,8 @@
 </template>
 
 <script>
+import _ from 'lodash'
+
 export default {
   data() {
     return {
@@ -87,7 +94,10 @@ export default {
         // 商品所处分类数组
         goods_cat: [],
         // 图片数组
-        pics: []
+        pics: [],
+        // 商品的详情描述
+        goods_introduce: '',
+        attrs: []
       },
       //   商品参数 规则
       addFormRules: {
@@ -230,6 +240,43 @@ export default {
       //   2.将图片信息对象，push到pics数组中
       this.addForm.pics.push(picInfo)
       console.log(this.addForm)
+    },
+    // 添加商品
+    add() {
+      this.$refs.addFormRef.validate(async valid => {
+        if (!valid) {
+          return this.$message.error('请填写必要的表单项！')
+        }
+        //   执行添加的业务逻辑
+        // lodash  cloneDeep(obj)
+        const form = _.cloneDeep(this.addForm)
+        form.goods_cat = form.goods_cat.join(',')
+        // 处理动态参数
+        this.manyTableData.forEach(item => {
+          const newInfo = {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals.join(' ')
+          }
+          this.addForm.attrs.push(newInfo)
+        })
+        // 处理静态属性
+        this.onlyTableData.forEach(item => {
+          const newInfo = { attr_id: item.attr_id, attr_value: item.attr_vals }
+          this.addForm.attrs.push(newInfo)
+        })
+        // 将addForm赋值到form
+        form.attrs = this.addForm.attrs
+        console.log(form)
+
+        // 发起请求，添加商品
+        // 商品名称，必须唯一
+        const { data: res } = await this.$http.post('goods', form)
+        if (res.meta.status !== 201) {
+          return this.$message.error('添加商品信息失败！')
+        }
+        this.$message.success('添加商品信息成功！')
+        this.$router.push('/goods')
+      })
     }
   },
   computed: {
@@ -250,5 +297,9 @@ export default {
 
 .previewImg {
   width: 100%;
+}
+
+.btnAdd {
+  margin-top: 10px;
 }
 </style>
