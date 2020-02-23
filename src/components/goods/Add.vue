@@ -56,7 +56,7 @@
           </el-tab-pane>
           <el-tab-pane label="商品图片" name="3">
             <!-- action  表示图片要上传到的后台API地址 -->
-            <el-upload :action="uploadUrl" :on-preview="handlePreview" :on-remove="handleRemove" list-type="picture" :headers="headersObj">
+            <el-upload :action="uploadUrl" :on-preview="handlePreview" :on-remove="handleRemove" list-type="picture" :headers="headersObj" :on-success="handleSuccess">
               <el-button size="small" type="primary">点击上传</el-button>
             </el-upload>
           </el-tab-pane>
@@ -64,6 +64,11 @@
         </el-tabs>
       </el-form>
     </el-card>
+
+    <!-- 图片预览区域 -->
+    <el-dialog title="图片预览" :visible.sync="previewDialogVisible" width="50%">
+      <img :src="previewPath" alt="" class="previewImg">
+    </el-dialog>
   </div>
 </template>
 
@@ -80,7 +85,9 @@ export default {
         goods_weight: 0,
         goods_number: 0,
         // 商品所处分类数组
-        goods_cat: []
+        goods_cat: [],
+        // 图片数组
+        pics: []
       },
       //   商品参数 规则
       addFormRules: {
@@ -127,7 +134,11 @@ export default {
       //   图片上传组件的headers请求头对象
       headersObj: {
         Authorization: window.sessionStorage.getItem('token')
-      }
+      },
+      //   预览图片的路径
+      previewPath: '',
+      //   控制图片预览框的显示与隐藏
+      previewDialogVisible: false
     }
   },
   created() {
@@ -194,9 +205,32 @@ export default {
       }
     },
     // 处理图片预览效果
-    handlePreview() {},
+    handlePreview(file) {
+      console.log(file)
+      this.previewPath = file.response.data.url
+      this.previewDialogVisible = true
+    },
     // 处理移除图片的操作
-    handleRemove() {}
+    handleRemove(file) {
+      //   console.log(file)
+
+      // 1.获取将要删除的图片临时路径
+      const filePath = file.response.data.temp_path
+      // 2.从pic数组中，找到这个图片对应的索引值
+      const i = this.addForm.pics.findIndex(x => x.pic === filePath)
+      // 3.调用数组中的splice方法。把图片信息对象，从pics数组中移除
+      this.addForm.pics.splice(i, 1)
+      console.log(this.addForm)
+    },
+    // 监听图片上传成功的事件
+    handleSuccess(response) {
+      console.log(response)
+      //   1.拼接得到一个图片的信息对象
+      const picInfo = { pic: response.data.tmp_path }
+      //   2.将图片信息对象，push到pics数组中
+      this.addForm.pics.push(picInfo)
+      console.log(this.addForm)
+    }
   },
   computed: {
     cateId() {
@@ -212,5 +246,9 @@ export default {
 <style lang="less" scoped>
 .el-checkbox {
   margin: 0 10px 0 0 !important;
+}
+
+.previewImg {
+  width: 100%;
 }
 </style>
