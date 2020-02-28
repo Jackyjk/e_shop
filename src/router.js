@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import VueRouter from 'vue-router'
 
 // import Login from './components/Login.vue'
 const Login = () => import(/* webpackChunkName: "login_home_welcome" */ './components/Login.vue')
@@ -30,27 +30,63 @@ const Order = () => import(/* webpackChunkName: "Order_Report" */ './components/
 // import Report from './components/report/Report.vue'
 const Report = () => import(/* webpackChunkName: "Order_Report" */ './components/report/Report.vue')
 
-Vue.use(Router)
+Vue.use(VueRouter)
 
-const router = new Router({
+const router = new VueRouter({
   routes: [
-    { path: '/', redirect: '/login' },
-    { path: '/login', component: Login },
+    {
+      path: '/',
+      redirect: '/login'
+    },
+    {
+      path: '/login',
+      component: Login
+    },
     {
       path: '/home',
       component: Home,
       redirect: '/welcome',
       children: [
-        { path: '/welcome', component: Welcome },
-        { path: '/users', component: Users },
-        { path: '/rights', component: Rights },
-        { path: '/roles', component: Roles },
-        { path: '/categories', component: Cate },
-        { path: '/params', component: Params },
-        { path: '/goods', component: GoodsList },
-        { path: '/goods/add', component: Add },
-        { path: '/orders', component: Order },
-        { path: '/reports', component: Report }
+        {
+          path: '/welcome',
+          component: Welcome
+        },
+        {
+          path: '/users',
+          component: Users
+        },
+        {
+          path: '/rights',
+          component: Rights
+        },
+        {
+          path: '/roles',
+          component: Roles
+        },
+        {
+          path: '/categories',
+          component: Cate
+        },
+        {
+          path: '/params',
+          component: Params
+        },
+        {
+          path: '/goods',
+          component: GoodsList
+        },
+        {
+          path: '/goods/add',
+          component: Add
+        },
+        {
+          path: '/orders',
+          component: Order
+        },
+        {
+          path: '/reports',
+          component: Report
+        }
       ]
     }
   ]
@@ -63,10 +99,12 @@ router.beforeEach((to, from, next) => {
   // next 是一个函数，表示放行
   //     next()  放行    next('/login')  强制跳转
 
-  if (to.path === '/login') return next()
-  // 获取token
-  const tokenStr = window.sessionStorage.getItem('token')
-  if (!tokenStr) return next('/login')
+  if (to.path === '/login' || to.path === '/') return next()
+  // 如果用户访问非登录路径，则判断有无登录凭证token
+  const loginToken = sessionStorage.getItem('token')
+  // 没有token，直接跳转登录页面
+  if (!loginToken) return next('/login')
+  // 有token，放行
   next()
 })
 
