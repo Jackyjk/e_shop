@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import router from './router'
+import router from './router.js'
 import './plugins/element.js'
 // 导入字体图标库
 import './assets/fonts/iconfont.css'
