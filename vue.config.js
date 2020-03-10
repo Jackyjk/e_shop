@@ -6,6 +6,7 @@ module.exports = {
   css: {
     extract: false
   },
+  // 链式编程方式
   chainWebpack: config => {
     // 发布模式
     config.when(process.env.NODE_ENV === 'production', config => {
@@ -13,7 +14,7 @@ module.exports = {
 
       config.set('externals', {
         vue: 'Vue',
-        'vue-router': 'Vuerouter',
+        'vue-router': 'VueRouter',
         axios: 'axios',
         lodash: '_',
         echarts: 'echarts',

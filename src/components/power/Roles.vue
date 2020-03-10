@@ -107,7 +107,7 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
       // 所有角色列表数据
       rolelist: [],
@@ -118,9 +118,7 @@ export default {
       // 修改表单的验证规则对象
       roleName: {
         email: [{ required: true, message: '请输入用户名称', trigger: 'blur' }],
-        roleDesc: [
-          { required: true, message: '请输入用户描述', trigger: 'blur' }
-        ]
+        roleDesc: [{ required: true, message: '请输入用户描述', trigger: 'blur' }]
       },
       // 修改表单的验证规则对象
       editFormRules: {
@@ -144,12 +142,12 @@ export default {
       addFormRole: {}
     }
   },
-  created () {
+  created() {
     this.getRolesList()
   },
   methods: {
     //   获取所有角色列表
-    async getRolesList () {
+    async getRolesList() {
       const { data: res } = await this.$http.get('roles')
       if (res.meta.status !== 200) {
         return this.$message.error('获取角色列表失败！！')
@@ -159,7 +157,7 @@ export default {
       console.log(this.rolelist)
     },
     // 展示编辑用户的对话框
-    async showRolesDialog (id) {
+    async showRolesDialog(id) {
       // console.log(id)
       const { data: res } = await this.$http.get('roles/' + id)
 
@@ -171,22 +169,19 @@ export default {
       this.editDialogVisible = true
     },
     // 监听修改用户对话框的关闭事件
-    editDialogClosed () {
+    editDialogClosed() {
       this.$refs.editFormRef.resetFields()
     },
     // 修改用户信息并提交
-    editRolesInfo () {
+    editRolesInfo() {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
         // 发起修改用户信息的数据请求
         // console.log(this.editForm)
-        const { data: res } = await this.$http.put(
-          `roles/${this.editForm.roleId}`,
-          {
-            roleName: this.editForm.roleName,
-            roleDesc: this.editForm.roleDesc
-          }
-        )
+        const { data: res } = await this.$http.put(`roles/${this.editForm.roleId}`, {
+          roleName: this.editForm.roleName,
+          roleDesc: this.editForm.roleDesc
+        })
 
         if (res.meta.status !== 200) {
           return this.$message.error('更新用户信息失败！')
@@ -201,16 +196,12 @@ export default {
       })
     },
     // id删除对应用户信息
-    async removeRolesById (id) {
-      const confirmResult = await this.$confirm(
-        '此操作将永久删除该用户, 是否继续?',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).catch(err => err)
+    async removeRolesById(id) {
+      const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
       // 如果用户确认删除  返回值为字符串 confirm
       // 如果用户取消删除   返回字符串 cancel
       // console.log(confirmResult)
@@ -225,24 +216,18 @@ export default {
       this.getRolesList()
     },
     // 根据id删除对应权限
-    async removeRightById (role, rightId) {
+    async removeRightById(role, rightId) {
       // 弹框提示用户  是否删除
-      const confirmResult = await this.$confirm(
-        '此操作将永久删除该用户对应权限, 是否继续?',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).catch(err => err)
+      const confirmResult = await this.$confirm('此操作将永久删除该用户对应权限, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
       if (confirmResult !== 'confirm') {
         return this.$message.info('取消删除成功')
       }
       // console.log('确认删除')
-      const { data: res } = await this.$http.delete(
-        `roles/${role.id}/rights/${rightId}`
-      )
+      const { data: res } = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
       if (res.meta.status !== 200) {
         return this.$message.error('删除权限失败')
       }
@@ -251,7 +236,7 @@ export default {
     },
 
     // 展示分配权限的对话框
-    async showSetRightDialog (role) {
+    async showSetRightDialog(role) {
       this.roleId = role.id
       // 获取所有权限的数据
       const { data: res } = await this.$http.get('rights/tree')
@@ -268,7 +253,7 @@ export default {
     },
 
     // 通过递归  获取角色下所有三级权限的id,并保存到defKeys中
-    getLeafKeys (node, arr) {
+    getLeafKeys(node, arr) {
       // 如果当前node节点不包含children属性  则指三级节点
       if (!node.children) {
         return arr.push(node.id)
@@ -276,26 +261,20 @@ export default {
       node.children.forEach(item => this.getLeafKeys(item, arr))
     },
     // 监听分配权限对话框的关闭时间
-    setRighgtDialogClosed () {
+    setRighgtDialogClosed() {
       this.defKeys = []
     },
 
     // 分配权限函数
-    async allotRights () {
-      const keys = [
-        ...this.$refs.treeRef.getCheckedKeys(),
-        ...this.$refs.treeRef.getHalfCheckedKeys()
-      ]
+    async allotRights() {
+      const keys = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
 
       // console.log(keys)
 
       const idStr = keys.join(',')
-      const { data: res } = await this.$http.post(
-        `roles/${this.roleId}/rights`,
-        {
-          rids: idStr
-        }
-      )
+      const { data: res } = await this.$http.post(`roles/${this.roleId}/rights`, {
+        rids: idStr
+      })
       if (res.meta.status !== 200) {
         return this.$message.error('分配权限失败！')
       }
@@ -306,7 +285,7 @@ export default {
       this.setRighgtDialogVisible = false
     },
     // 添加角色
-    addRole () {
+    addRole() {
       this.$refs.addFormRoleRef.validate(async valid => {
         // console.log(valid)
         if (!valid) return
@@ -324,7 +303,7 @@ export default {
       })
     },
     // 监听添加用户对话框
-    addRoleDialogClosed () {
+    addRoleDialogClosed() {
       this.$refs.addFormRef.resetFields()
     }
   }
